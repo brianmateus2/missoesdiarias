@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz ENEM – 2 Questões</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f1ea;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 40px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Decoração inspirada no design de referência (folhas + manchas olive) */
+    .deco {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.9;
+    }
+    .deco svg { display: block; width: 100%; height: 100%; }
+    .deco-tl { top: -20px; left: -20px; width: 220px; height: 160px; }
+    .deco-tr { top: -30px; right: -30px; width: 200px; height: 200px; }
+    .deco-bl { bottom: -30px; left: -30px; width: 200px; height: 240px; }
+    .deco-br { bottom: -20px; right: -20px; width: 220px; height: 220px; }
+    @media (max-width: 700px) {
+      .deco { transform: scale(0.6); }
+      .deco-tl, .deco-bl { transform-origin: left bottom; }
+      .deco-tr, .deco-br { transform-origin: right bottom; }
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #4b5a34;
+      margin-bottom: 36px;
+      letter-spacing: 0.5px;
+      border-bottom: 3px solid #7d8f5c;
+      padding-bottom: 14px;
+    }
+
+    .questao {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 28px 32px;
+      margin-bottom: 32px;
+    }
+
+    .questao-titulo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #4b5a34;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 18px;
+    }
+
+    .questao img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid #e0e4ea;
+      margin-bottom: 22px;
+    }
+
+    .alternativas-titulo {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+
+    .alternativas {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .alternativas li {
+      background: #f4f6ef;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.97rem;
+      border: 1px solid #dce3ec;
+      line-height: 1.5;
+    }
+
+    .alternativas li span.letra {
+      font-weight: 700;
+      color: #4b5a34;
+      margin-right: 6px;
+    }
+
+    hr.divisor {
+      border: none;
+      border-top: 1px dashed #ccd4de;
+      margin: 8px 0 20px 0;
+    }
+
+    /* Botão revelar */
+    .btn-revelar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #6b7b4a;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 11px 22px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: background 0.2s;
+    }
+
+    .btn-revelar:hover {
+      background: #57663b;
+    }
+
+    .btn-revelar svg {
+      width: 18px;
+      height: 18px;
+      fill: #f4d35e;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-revelar.aberto svg {
+      transform: rotate(180deg);
+    }
+
+    /* Painel de resposta (fade + slide) */
+    .resposta-wrapper {
+      margin-top: 10px;
+    }
+
+    .resposta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-10px);
+      margin-top: 0;
+      background: #4b5a34;
+      color: #ffffff;
+      border-radius: 8px;
+      transition: max-height 0.45s ease, opacity 0.35s ease, transform 0.35s ease, margin-top 0.45s ease, padding 0.45s ease;
+      padding: 0 20px;
+    }
+
+    .resposta.visivel {
+      max-height: 600px;
+      opacity: 1;
+      transform: translateY(0);
+      margin-top: 12px;
+      padding: 16px 20px;
+    }
+
+    .resposta-linha {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.97rem;
+      line-height: 1.55;
+    }
+
+    .resposta-linha .rotulo {
+      font-weight: 700;
+    }
+
+    .resposta .letra-correta {
+      color: #f4d35e;
+      font-weight: 700;
+    }
+
+    .resposta-explicacao {
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deco deco-tl">
+    <svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 C40,20 80,0 140,0 L220,0 L220,0 C160,10 120,40 70,80 C40,105 15,90 0,60 Z" fill="#a3ac81" opacity="0.55"/>
+    </svg>
+  </div>
+  <div class="deco deco-tr">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#7d8f5c" stroke-width="1.2">
+      <path d="M190,10 C160,20 130,35 105,60 C90,75 80,90 70,110"/>
+      <path d="M120,45 L90,25 M130,60 L98,45 M140,78 L108,66 M150,95 L118,86"/>
+    </svg>
+  </div>
+  <div class="deco deco-bl">
+    <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3a3a3a" stroke-width="1.2">
+      <path d="M10,230 C15,180 25,140 45,100 C60,70 75,45 95,20"/>
+      <path d="M20,190 L55,175 M15,160 L52,148 M12,130 L48,120 M10,100 L44,92 M12,70 L44,64"/>
+    </svg>
+  </div>
+  <div class="deco deco-br">
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <path d="M220,60 C190,20 150,0 100,0 L220,0 Z" fill="#8b9a67" opacity="0.5"/>
+      <path d="M0,220 C40,200 90,205 130,190 C160,178 175,160 190,210 C195,215 200,220 200,220 Z" fill="#a3ac81" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <div class="container">
+
+    <h1>Quiz ENEM – 2 Questões</h1>
+
+    <!-- QUESTÃO 1 -->
+    <div class="questao">
+      <div class="questao-titulo">Questão 1</div>
+      <img
+        src="https://skyagent-artifacts.skywork.ai/router/agent/2026-06-17/prod_agent_f2a86c2f-3e84-4f62-9c1d-dc6837b028a1/imagem_2026-06-16_220212839_4dacf989af9f42f29c5a18646ef89588.png"
+        alt="Questão 1 – Triângulos com palitos de fósforo"
+      />
+      <hr class="divisor" />
+      <div class="alternativas-titulo">Alternativas:</div>
+      <ul class="alternativas">
+        <li><span class="letra">A)</span> 3.</li>
+        <li><span class="letra">B)</span> 5.</li>
+        <li><span class="letra">C)</span> 6.</li>
+        <li><span class="letra">D)</span> 8.</li>
+        <li><span class="letra">E)</span> 10.</li>
+      </ul>
+      <div class="resposta-wrapper">
+        <button class="btn-revelar" onclick="revelar(this)">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+          <span class="btn-texto">Revelar resposta</span>
+        </button>
+        <div class="resposta" id="resp1">
+          <div class="resposta-linha">
+            <span>✅</span>
+            <span><span class="rotulo">Alternativa correta:</span> <span class="letra-correta">A) 3</span></span>
+          </div>
+          <div class="resposta-linha">
+            <span>💡</span>
+            <span class="resposta-explicacao"><span class="rotulo">Explicação:</span>
+Temos apenas 3 combinações possíveis para montar o triângulo:
+• 6-8-3
+• 6-7-4
+• 6-6-5
+
+Por isso, a alternativa A (3) está correta.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUESTÃO 2 -->
+    <div class="questao">
+      <div class="questao-titulo">Questão 2</div>
+      <img
+        src="https://skyagent-artifacts.skywork.ai/router/agent/2026-06-17/prod_agent_f2a86c2f-3e84-4f62-9c1d-dc6837b028a1/imagem_2026-06-16_220411463_47cf701d6a2340af80800348233c299b.png"
+        alt="Questão 2 – Órbita de satélite"
+      />
+      <hr class="divisor" />
+      <div class="alternativas-titulo">Alternativas:</div>
+      <ul class="alternativas">
+        <li><span class="letra">A)</span> 12 765 km.</li>
+        <li><span class="letra">B)</span> 12 000 km.</li>
+        <li><span class="letra">C)</span> 11 730 km.</li>
+        <li><span class="letra">D)</span> 10 965 km.</li>
+        <li><span class="letra">E)</span> 5 865 km.</li>
+      </ul>
+      <div class="resposta-wrapper">
+        <button class="btn-revelar" onclick="revelar(this)">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+          <span class="btn-texto">Revelar resposta</span>
+        </button>
+        <div class="resposta" id="resp2">
+          <div class="resposta-linha">
+            <span>✅</span>
+            <span><span class="rotulo">Alternativa correta:</span> <span class="letra-correta">B) 12 000 km</span></span>
+          </div>
+          <div class="resposta-linha">
+            <span>💡</span>
+            <span class="resposta-explicacao"><span class="rotulo">Explicação:</span>
+O exercício pede a soma das duas distâncias alcançadas na órbita.
+
+S = 6900 + 5100 = 12000 km
+
+O resultado coincide com a alternativa B (12 000 km).</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function revelar(btn) {
+      const wrapper = btn.closest('.resposta-wrapper');
+      const resposta = wrapper.querySelector('.resposta');
+      const texto = btn.querySelector('.btn-texto');
+      const aberto = resposta.classList.toggle('visivel');
+      btn.classList.toggle('aberto', aberto);
+      texto.textContent = aberto ? 'Ocultar resposta' : 'Revelar resposta';
+    }
+  </script>
+</body>
+</html>
